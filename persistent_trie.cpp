@@ -1,8 +1,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-template<int B = 30>
+template<class T = int, int B = sizeof(T) * 8>
 struct PersistentTrie {
+    using UT = typename make_unsigned<T>::type;
+
     vector<array<int, 2>> ch;
     vector<int> cnt;
     vector<int> root;
@@ -21,7 +23,7 @@ struct PersistentTrie {
         return (int)ch.size() - 1;
     }
 
-    int update(int v, int x, int delta) {
+    int update(int v, UT x, int delta) {
         int r = clone(v);
         int cur = r;
         cnt[cur] += delta;
@@ -35,15 +37,16 @@ struct PersistentTrie {
         return r;
     }
 
-    int insert(int v, int x) { return update(v, x, 1); }
-    int erase(int v, int x) { return update(v, x, -1); }
+    int insert(int v, T x) { return update(v, (UT)x, 1); }
+    int erase(int v, T x) { return update(v, (UT)x, -1); }
 
-    int push(int x) {
+    int push(T x) {
         root.push_back(insert(root.back(), x));
         return (int)root.size() - 1;
     }
 
-    int count(int a, int b, int x) {
+    int count(int a, int b, T xVal) {
+        UT x = (UT)xVal;
         for (int i = B - 1; i >= 0; i--) {
             int bit = (x >> i) & 1;
             a = ch[a][bit];
@@ -52,7 +55,8 @@ struct PersistentTrie {
         return cnt[b] - cnt[a];
     }
 
-    int less(int a, int b, int x) {
+    int less(int a, int b, T xVal) {
+        UT x = (UT)xVal;
         int res = 0;
         for (int i = B - 1; i >= 0; i--) {
             int bit = (x >> i) & 1;
@@ -63,8 +67,8 @@ struct PersistentTrie {
         return res;
     }
 
-    int kth(int a, int b, int k) {
-        int res = 0;
+    T kth(int a, int b, int k) {
+        UT res = 0;
         for (int i = B - 1; i >= 0; i--) {
             int c = cnt[ch[b][0]] - cnt[ch[a][0]];
             if (k <= c) {
@@ -72,21 +76,22 @@ struct PersistentTrie {
                 b = ch[b][0];
             } else {
                 k -= c;
-                res |= 1 << i;
+                res |= (UT)1 << i;
                 a = ch[a][1];
                 b = ch[b][1];
             }
         }
-        return res;
+        return (T)res;
     }
 
-    int maxXor(int a, int b, int x) {
-        int res = 0;
+    T maxXor(int a, int b, T xVal) {
+        UT x = (UT)xVal;
+        UT res = 0;
         for (int i = B - 1; i >= 0; i--) {
             int bit = (x >> i) & 1;
             int w = bit ^ 1;
             if (cnt[ch[b][w]] - cnt[ch[a][w]] > 0) {
-                res |= 1 << i;
+                res |= (UT)1 << i;
                 a = ch[a][w];
                 b = ch[b][w];
             } else {
@@ -94,22 +99,23 @@ struct PersistentTrie {
                 b = ch[b][bit];
             }
         }
-        return res;
+        return (T)res;
     }
 
-    int minXor(int a, int b, int x) {
-        int res = 0;
+    T minXor(int a, int b, T xVal) {
+        UT x = (UT)xVal;
+        UT res = 0;
         for (int i = B - 1; i >= 0; i--) {
             int bit = (x >> i) & 1;
             if (cnt[ch[b][bit]] - cnt[ch[a][bit]] > 0) {
                 a = ch[a][bit];
                 b = ch[b][bit];
             } else {
-                res |= 1 << i;
+                res |= (UT)1 << i;
                 a = ch[a][bit ^ 1];
                 b = ch[b][bit ^ 1];
             }
         }
-        return res;
+        return (T)res;
     }
 };

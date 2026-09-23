@@ -1,17 +1,17 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+template<class T = int, class W = long long>
 struct RangeTree {
-    typedef long long ll;
     int n;
-    vector<int> px, py;
-    vector<ll> pw;
-    vector<int> xs, yv, rootY;
-    vector<ll> wv;
+    vector<T> px, py;
+    vector<W> pw;
+    vector<T> xs, yv, rootY;
+    vector<W> wv;
     vector<vector<int>> lp;
-    vector<vector<ll>> ps;
+    vector<vector<W>> ps;
 
-    void add(int x, int y, ll w = 1) {
+    void add(T x, T y, W w = 1) {
         px.push_back(x);
         py.push_back(y);
         pw.push_back(w);
@@ -50,7 +50,7 @@ struct RangeTree {
     void build(int v, int l, int r, vector<int>& ord) {
         int len = (int)ord.size();
         lp[v].assign(len + 1, 0);
-        ps[v].assign(len + 1, 0);
+        ps[v].assign(len + 1, W(0));
         int mid = (l + r) / 2;
         vector<int> L, R;
         for (int i = 0; i < len; i++) {
@@ -64,7 +64,7 @@ struct RangeTree {
         build(2 * v + 1, mid, r, R);
     }
 
-    void go(int v, int l, int r, int ql, int qr, int a, int b, ll& c, ll& s) {
+    void go(int v, int l, int r, int ql, int qr, int a, int b, long long& c, W& s) {
         if (a >= b || qr <= l || r <= ql) return;
         if (ql <= l && r <= qr) {
             c += b - a;
@@ -76,18 +76,19 @@ struct RangeTree {
         go(2 * v + 1, mid, r, ql, qr, a - lp[v][a], b - lp[v][b], c, s);
     }
 
-    pair<ll, ll> query(int x1, int x2, int y1, int y2) {
-        ll c = 0, s = 0;
-        if (n == 0 || x1 > x2 || y1 > y2) return {0, 0};
+    pair<long long, W> query(T x1, T x2, T y1, T y2) {
+        long long c = 0;
+        W s = 0;
+        if (n == 0 || x1 > x2 || y1 > y2) return {0, W(0)};
         int ql = lower_bound(xs.begin(), xs.end(), x1) - xs.begin();
         int qr = upper_bound(xs.begin(), xs.end(), x2) - xs.begin();
-        if (ql >= qr) return {0, 0};
+        if (ql >= qr) return {0, W(0)};
         int a = lower_bound(rootY.begin(), rootY.end(), y1) - rootY.begin();
         int b = upper_bound(rootY.begin(), rootY.end(), y2) - rootY.begin();
         go(1, 0, n, ql, qr, a, b, c, s);
         return {c, s};
     }
 
-    ll count(int x1, int x2, int y1, int y2) { return query(x1, x2, y1, y2).first; }
-    ll sum(int x1, int x2, int y1, int y2) { return query(x1, x2, y1, y2).second; }
+    long long count(T x1, T x2, T y1, T y2) { return query(x1, x2, y1, y2).first; }
+    W sum(T x1, T x2, T y1, T y2) { return query(x1, x2, y1, y2).second; }
 };
